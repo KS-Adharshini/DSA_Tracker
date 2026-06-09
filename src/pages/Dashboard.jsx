@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { CalendarCheck, Flame, ListChecks, Target, TrendingUp } from '../components/Icons.jsx';
 import ProgressBar from '../components/ProgressBar.jsx';
 import TopicCard from '../components/TopicCard.jsx';
@@ -13,6 +14,7 @@ export default function Dashboard({
   weeklyProgress,
   actions,
 }) {
+  const navigate = useNavigate();
   const favoriteTopics = topics.filter((topic) => favorites.includes(topic.id)).slice(0, 4);
 
   return (
@@ -38,7 +40,7 @@ export default function Dashboard({
           <span>Total Problems</span>
           <strong>{stats.totalTopics}</strong>
         </article>
-        <article className="stat-card">
+        <article className="stat-card" role="button" tabIndex={0} onClick={() => navigate('/completed')} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') navigate('/completed'); }} style={{ cursor: 'pointer' }}>
           <CalendarCheck size={22} />
           <span>Completed Problems</span>
           <strong>{stats.completedTopics}</strong>

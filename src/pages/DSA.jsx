@@ -3,6 +3,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage.js';
 import { ExternalLink, FilePenLine, Search } from '../components/Icons.jsx';
 
 const FOLDER_NAMES = [
+  'Leetcode',
   'Reverse',
   'Arrays',
   'Strings',
@@ -14,8 +15,11 @@ const FOLDER_NAMES = [
   'Dynamic Programming'
 ];
 
-const mapSectionToCategory = (section) => {
+const mapSectionToCategory = (section, category = 'DSA') => {
+  if (category !== 'DSA') return category;
+
   const s = section.toLowerCase();
+  if (['arrays', 'recursion', 'backtracking', 'hashing', 'greedy', 'database'].includes(s)) return 'Leetcode';
   if (s.includes('reverse') || s.includes('rotate') || s.includes('rotation')) return 'Reverse';
   if (s.includes('linked list') || s.includes('list') || s.includes('cache')) return 'Linked List';
   if (s.includes('stack') || s.includes('parenthesis') || s.includes('infix') || s.includes('postfix') || s.includes('prefix') || s.includes('expression')) return 'Stack';
@@ -66,27 +70,27 @@ export default function DSA({
     });
   };
 
-  // 1. Filter out non-DSA topics (Core subjects, Aptitude, Mock tests, etc.)
-  const dsaTopics = useMemo(() => {
-    return topics.filter(t => t.category === 'DSA');
+  // Use only DSA-specific topics in this view.
+  const sheetTopics = useMemo(() => {
+    return topics.filter((topic) => topic.category === 'DSA');
   }, [topics]);
 
-  // 2. Classify and group topics into the 9 target categories
+  // 2. Classify and group topics into the old themed folders.
   const groupedDSA = useMemo(() => {
     const groups = {};
     FOLDER_NAMES.forEach(f => {
       groups[f] = [];
     });
 
-    dsaTopics.forEach(topic => {
-      const category = mapSectionToCategory(topic.section);
+    sheetTopics.forEach(topic => {
+      const category = mapSectionToCategory(topic.section, topic.category);
       if (groups[category]) {
         groups[category].push(topic);
       }
     });
 
     return groups;
-  }, [dsaTopics]);
+  }, [sheetTopics]);
 
   // 3. Filter by search query within each group
   const searchFilteredGroupedDSA = useMemo(() => {
@@ -121,8 +125,8 @@ export default function DSA({
       <section className="page-hero dsa-hero">
         <div>
           <p className="eyebrow">Practice Tracker</p>
-          <h2>DSA Problem Sets</h2>
-          <p>Organize, track, and master data structures and algorithms with rich notes and detailed tracking.</p>
+          <h2>Complete Placement Sheet</h2>
+          <p>All imported DSA_sheet.html resources are available here with hyperlinks, progress tracking, and rich notes.</p>
         </div>
         <div className="search-bar-wrap">
           <div className="search-box">

@@ -2,10 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import Sidebar from './components/Sidebar.jsx';
+import { BookOpen, BarChart3, CalendarCheck, Code2, Settings as SettingsIcon } from './components/Icons.jsx';
 import { defaultTopics, navCategories } from './data/topics.js';
 import { useLocalStorage } from './hooks/useLocalStorage.js';
 import Dashboard from './pages/Dashboard.jsx';
 import DSA from './pages/DSA.jsx';
+import Completed from './pages/Completed.jsx';
+import Calendar from './pages/Calendar.jsx';
+import CoreSubjects from './pages/CoreSubjects.jsx';
+import Aptitude from './pages/Aptitude.jsx';
+import InterviewPreparation from './pages/InterviewPreparation.jsx';
+import MockTests from './pages/MockTests.jsx';
 import Settings from './pages/Settings.jsx';
 import NotesDrawer from './components/NotesDrawer.jsx';
 
@@ -54,7 +61,7 @@ export default function App() {
 
   const topics = useMemo(() => {
     const raw = [...defaultTopics, ...importedTopics];
-    return raw.filter(t => t.category === 'DSA');
+    return raw;
   }, [importedTopics]);
 
   const topicById = useMemo(() => new Map(topics.map((topic) => [topic.id, topic])), [topics]);
@@ -76,6 +83,10 @@ export default function App() {
   };
 
   const dsaFolders = [
+    'Core Subjects',
+    'Aptitude',
+    'Interview Preparation',
+    'Mock Tests',
     'Reverse',
     'Arrays',
     'Strings',
@@ -87,7 +98,9 @@ export default function App() {
     'Dynamic Programming'
   ];
 
-  const mapSectionToCategory = (section) => {
+  const mapSectionToCategory = (section, category = 'DSA') => {
+    if (category !== 'DSA') return category;
+
     const s = section.toLowerCase();
     if (s.includes('reverse') || s.includes('rotate') || s.includes('rotation')) return 'Reverse';
     if (s.includes('linked list') || s.includes('list') || s.includes('cache')) return 'Linked List';
@@ -107,7 +120,7 @@ export default function App() {
     });
 
     topics.forEach(topic => {
-      const folder = mapSectionToCategory(topic.section);
+      const folder = mapSectionToCategory(topic.section, topic.category);
       if (statsMap[folder]) {
         statsMap[folder].total += 1;
         if (completed[topic.id]) {
@@ -272,6 +285,20 @@ export default function App() {
     };
   };
 
+  const navItems = [
+    { label: 'Dashboard', path: '/', icon: BarChart3 },
+    { label: 'DSA Tracker', path: '/dsa', icon: Code2 },
+    { label: 'Calendar', path: '/calendar', icon: CalendarCheck },
+    ...navCategories
+      .filter((category) => category !== 'DSA')
+      .map((category) => ({
+        label: category,
+        path: categoryToPath[category],
+        icon: BookOpen,
+      })),
+    { label: 'Settings', path: '/settings', icon: SettingsIcon },
+  ];
+
   const selectSearchResult = (topic) => {
     setQuery('');
     navigate(categoryToPath[topic.category] || '/');
@@ -283,6 +310,7 @@ export default function App() {
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed((current) => !current)}
         completionPercentage={stats.completionPercentage}
+        navItems={navItems}
       />
       <div className="main-shell">
         <Navbar
@@ -312,6 +340,12 @@ export default function App() {
             )}
           />
           <Route path="/dsa" element={<DSA topics={topics} completed={completed} notes={notes} actions={actions} />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/completed" element={<Completed topics={topics} completed={completed} notes={notes} favorites={favorites} actions={actions} />} />
+          <Route path="/core-subjects" element={<CoreSubjects {...categoryPageProps('Core Subjects')} />} />
+          <Route path="/aptitude" element={<Aptitude {...categoryPageProps('Aptitude')} />} />
+          <Route path="/interview" element={<InterviewPreparation {...categoryPageProps('Interview Preparation')} />} />
+          <Route path="/mock-tests" element={<MockTests {...categoryPageProps('Mock Tests')} />} />
           <Route
             path="/settings"
             element={(
@@ -334,6 +368,7 @@ export default function App() {
         topic={topicById.get(activeNoteTopicId)}
         initialNote={notes[activeNoteTopicId] || ''}
         onClose={() => setActiveNoteTopicId(null)}
+        onSaveDraft={(value) => saveNote(activeNoteTopicId, value)}
         onSaveNote={(value) => {
           saveNote(activeNoteTopicId, value);
           setActiveNoteTopicId(null);

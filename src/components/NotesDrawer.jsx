@@ -7,6 +7,7 @@ export default function NotesDrawer({
   initialNote,
   onClose,
   onSaveNote,
+  onSaveDraft,
   onDeleteNote,
 }) {
   const [draft, setDraft] = useState(initialNote || '');
@@ -19,12 +20,13 @@ export default function NotesDrawer({
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (topic && draft !== initialNote) {
-        onSaveNote(draft);
+        const saveFn = onSaveDraft || onSaveNote;
+        saveFn(draft);
       }
     }, 800); // Save after 800ms of inactivity
 
     return () => clearTimeout(delayDebounce);
-  }, [draft, initialNote, topic, onSaveNote]);
+  }, [draft, initialNote, topic, onSaveDraft, onSaveNote]);
 
   if (!topic) return null;
 
