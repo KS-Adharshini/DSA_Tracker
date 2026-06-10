@@ -36,7 +36,7 @@ export default function NotesDrawer({
   };
 
   const handleDelete = () => {
-    if (window.confirm('Delete note for this topic?')) {
+    if (window.confirm('Remove note for this topic?')) {
       onDeleteNote();
     }
   };
@@ -85,7 +85,7 @@ export default function NotesDrawer({
             Close
           </button>
           {initialNote && (
-            <button className="icon-button danger delete-btn" onClick={handleDelete} title="Delete note">
+            <button className="icon-button danger delete-btn" onClick={handleDelete} title="Remove note">
               <Trash2 size={18} />
             </button>
           )}

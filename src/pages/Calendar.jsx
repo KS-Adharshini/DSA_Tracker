@@ -267,8 +267,8 @@ export default function Calendar() {
                     >
                       Edit
                     </button>
-                    <button type="button" className="ghost-button danger-text" onClick={() => deleteTask(task.id)}>
-                      Delete
+                    <button type="button" className="ghost-button danger-text" onClick={() => deleteTask(task.id)} aria-label="Remove task">
+                      ✕
                     </button>
                   </div>
                 </div>

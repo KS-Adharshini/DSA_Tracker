@@ -214,11 +214,11 @@ export default function App() {
   const deleteTopic = (topicId) => {
     const topic = allTopicById.get(topicId);
     if (!topic) {
-      setDeleteError('Unable to delete the selected problem. It may already have been removed.');
+      setDeleteError('Unable to remove the selected problem. It may already have been removed.');
       return false;
     }
 
-    if (!window.confirm(`Move "${topic.name}" to Deleted Problems?`)) {
+    if (!window.confirm(`Move "${topic.name}" to Removed Problems?`)) {
       return false;
     }
 
@@ -250,7 +250,7 @@ export default function App() {
       });
       return true;
     } catch (error) {
-      setDeleteError('Something went wrong while deleting the problem. Please try again.');
+      setDeleteError('Something went wrong while removing the problem. Please try again.');
       return false;
     }
   };
@@ -272,11 +272,11 @@ export default function App() {
   const deleteTopicPermanently = (topicId) => {
     const topic = allTopicById.get(topicId);
     if (!topic) {
-      setDeleteError('Unable to permanently delete the selected problem.');
+      setDeleteError('Unable to permanently remove the selected problem.');
       return;
     }
 
-    if (!window.confirm(`Permanently delete "${topic.name}"? This cannot be restored.`)) {
+    if (!window.confirm(`Permanently remove "${topic.name}"? This cannot be restored.`)) {
       return;
     }
 
@@ -310,7 +310,7 @@ export default function App() {
         return next;
       });
     } catch (error) {
-      setDeleteError('Something went wrong while deleting the problem permanently. Please try again.');
+      setDeleteError('Something went wrong while removing the problem permanently. Please try again.');
     }
   };
 

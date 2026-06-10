@@ -46,17 +46,17 @@ export default function Settings({
         <article className="panel deleted-problems-panel">
           <div className="deleted-header">
             <div>
-              <p className="eyebrow">Deleted Problems</p>
-              <h3>Recover or remove deleted problems</h3>
-              <p>Restore recently deleted problems or permanently remove them from your tracker.</p>
+              <p className="eyebrow">Removed Problems</p>
+              <h3>Recover or remove removed problems</h3>
+              <p>Restore recently removed problems or permanently remove them from your tracker.</p>
             </div>
             <input
               className="search-input"
               type="search"
-              placeholder="Search deleted problems..."
+              placeholder="Search removed problems..."
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
-              aria-label="Search deleted problems"
+              aria-label="Search removed problems"
             />
           </div>
 
@@ -91,7 +91,7 @@ export default function Settings({
                       className="action-btn delete-icon-btn"
                       type="button"
                       onClick={() => onDeleteTopicPermanently(id)}
-                      title="Delete permanently"
+                      title="Remove permanently"
                     >
                       ✕
                     </button>
@@ -101,7 +101,7 @@ export default function Settings({
             </div>
           ) : (
             <div className="empty-state">
-              <p>No deleted problems found.</p>
+              <p>No removed problems found.</p>
             </div>
           )}
         </article>

@@ -239,8 +239,8 @@ export default function DSA({
                                     <button 
                                       className="action-btn delete-icon-btn"
                                       onClick={() => actions.onDeleteTopic(problem.id)}
-                                      title="Delete Problem"
-                                      aria-label={`Delete ${problem.name}`}
+                                      title="Remove problem"
+                                      aria-label={`Remove ${problem.name}`}
                                     >
                                       ✕
                                     </button>

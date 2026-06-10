@@ -30,8 +30,8 @@ function NoteCard({ topic, initialNote, onSaveNote, onDeleteNote }) {
         onBlur={handleBlur}
         placeholder="Type revision notes here... (saves automatically when clicking away)"
       />
-      <button className="ghost-button danger-text" type="button" onClick={() => onDeleteNote(topic.id)}>
-        Delete Note
+      <button className="ghost-button danger-text" type="button" onClick={() => onDeleteNote(topic.id)} aria-label="Remove note">
+        ✕
       </button>
     </article>
   );

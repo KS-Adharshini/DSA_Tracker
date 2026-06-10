@@ -74,17 +74,6 @@ export default function TopicDetail({ topicById, completed, notes, favorites, ac
           <span>{isDone ? 'Completed' : 'Mark as completed'}</span>
         </label>
 
-        <a
-          href={topic.url}
-          target="_blank"
-          rel="noreferrer"
-          className="action-button"
-          onClick={() => actions.onOpenResource(topic.id)}
-        >
-          Open Problem
-          <ExternalLink size={16} />
-        </a>
-
         <button className="ghost-button" type="button" onClick={() => actions.onEditNote(topic.id)}>
           <FilePenLine size={16} />
           {notes[topic.id] ? 'Edit Notes' : 'Add Notes'}
@@ -98,8 +87,8 @@ export default function TopicDetail({ topicById, completed, notes, favorites, ac
               navigate(categoryPath);
             }
           }}
-          title="Delete problem"
-          aria-label="Delete problem"
+          title="Remove problem"
+          aria-label="Remove problem"
         >
           ✕
         </button>
