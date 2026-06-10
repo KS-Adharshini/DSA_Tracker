@@ -183,11 +183,11 @@ export default function DSA({
                       <table className="problem-table">
                         <thead>
                           <tr>
-                            <th width="40">Status</th>
+                            <th width="48">Status</th>
                             <th>Problem Title</th>
-                            <th width="120">Sub-Topic</th>
-                            <th width="100">Difficulty</th>
-                            <th width="120" style={{ textAlign: 'right' }}>Actions</th>
+                            <th width="220">Sub-Topic</th>
+                            <th width="120">Difficulty</th>
+                            <th width="200" style={{ textAlign: 'right' }}>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -235,6 +235,14 @@ export default function DSA({
                                       title={hasNote ? 'Edit Notes (Saved)' : 'Add Notes'}
                                     >
                                       <FilePenLine size={14} /> {hasNote ? 'Revise' : 'Notes'}
+                                    </button>
+                                    <button 
+                                      className="action-btn delete-icon-btn"
+                                      onClick={() => actions.onDeleteTopic(problem.id)}
+                                      title="Delete Problem"
+                                      aria-label={`Delete ${problem.name}`}
+                                    >
+                                      ✕
                                     </button>
                                   </div>
                                 </td>

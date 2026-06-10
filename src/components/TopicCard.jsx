@@ -9,6 +9,7 @@ export default function TopicCard({
   onToggleFavorite,
   onOpenResource,
   onEditNote,
+  onDeleteTopic,
 }) {
   return (
     <article className={`topic-card ${completed ? 'is-complete' : ''}`}>
@@ -45,6 +46,9 @@ export default function TopicCard({
       {note && <p className="note-preview">{note}</p>}
 
       <div className="topic-actions">
+        <button className="action-btn delete-btn" type="button" onClick={() => onDeleteTopic(topic.id)} aria-label={`Delete ${topic.name}`}>
+          ✕ Delete
+        </button>
         <a href={topic.url} target="_blank" rel="noreferrer" onClick={() => onOpenResource(topic.id)}>
           Open Resource
           <ExternalLink size={16} />

@@ -14,6 +14,7 @@ import Aptitude from './pages/Aptitude.jsx';
 import InterviewPreparation from './pages/InterviewPreparation.jsx';
 import MockTests from './pages/MockTests.jsx';
 import Settings from './pages/Settings.jsx';
+import TopicDetail from './pages/TopicDetail.jsx';
 import NotesDrawer from './components/NotesDrawer.jsx';
 
 const formatDateKey = (date) => {
@@ -56,13 +57,18 @@ export default function App() {
   const [activityLog, setActivityLog] = useLocalStorage('pt-activity-log', {});
   const [dailyGoal, setDailyGoal] = useLocalStorage('pt-daily-goal', 3);
   const [importedTopics, setImportedTopics] = useLocalStorage('pt-imported-topics', []);
+  const [deletedTopics, setDeletedTopics] = useLocalStorage('pt-deleted-topics', {});
+  const [permanentlyDeletedTopicIds, setPermanentlyDeletedTopicIds] = useLocalStorage('pt-permanently-deleted-topics', []);
   const [query, setQuery] = useState('');
   const [activeNoteTopicId, setActiveNoteTopicId] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
 
-  const topics = useMemo(() => {
-    const raw = [...defaultTopics, ...importedTopics];
-    return raw;
-  }, [importedTopics]);
+  const allTopics = useMemo(() => [...defaultTopics, ...importedTopics], [importedTopics]);
+  const allTopicById = useMemo(() => new Map(allTopics.map((topic) => [topic.id, topic])), [allTopics]);
+  const topics = useMemo(
+    () => allTopics.filter((topic) => !deletedTopics[topic.id] && !permanentlyDeletedTopicIds.includes(topic.id)),
+    [allTopics, deletedTopics, permanentlyDeletedTopicIds],
+  );
 
   const topicById = useMemo(() => new Map(topics.map((topic) => [topic.id, topic])), [topics]);
 
@@ -156,6 +162,17 @@ export default function App() {
       })
     : [];
 
+  const deletedTopicDetails = useMemo(() => Object.entries(deletedTopics)
+    .filter(([topicId]) => !permanentlyDeletedTopicIds.includes(topicId))
+    .map(([topicId, metadata]) => ({
+      id: topicId,
+      ...metadata,
+      topic: allTopicById.get(topicId),
+    }))
+    .filter((entry) => entry.topic)
+    .sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt)),
+  [deletedTopics, allTopicById, permanentlyDeletedTopicIds]);
+
   const recentlyOpenedTopics = recentlyOpened
     .map((id) => topicById.get(id))
     .filter(Boolean)
@@ -192,6 +209,109 @@ export default function App() {
       delete next[topicId];
       return next;
     });
+  };
+
+  const deleteTopic = (topicId) => {
+    const topic = allTopicById.get(topicId);
+    if (!topic) {
+      setDeleteError('Unable to delete the selected problem. It may already have been removed.');
+      return false;
+    }
+
+    if (!window.confirm(`Move "${topic.name}" to Deleted Problems?`)) {
+      return false;
+    }
+
+    try {
+      const deletedAt = new Date().toISOString();
+      setDeletedTopics((current) => ({
+        ...current,
+        [topicId]: { deletedAt },
+      }));
+      setCompleted((current) => {
+        const next = { ...current };
+        delete next[topicId];
+        return next;
+      });
+      setNotes((current) => {
+        const next = { ...current };
+        delete next[topicId];
+        return next;
+      });
+      setFavorites((current) => current.filter((id) => id !== topicId));
+      setRecentlyOpened((current) => current.filter((id) => id !== topicId));
+      setActivityLog((current) => {
+        const next = {};
+        Object.entries(current).forEach(([date, ids]) => {
+          const filtered = ids.filter((id) => id !== topicId);
+          if (filtered.length) next[date] = filtered;
+        });
+        return next;
+      });
+      return true;
+    } catch (error) {
+      setDeleteError('Something went wrong while deleting the problem. Please try again.');
+      return false;
+    }
+  };
+
+  const restoreTopic = (topicId) => {
+    const topic = allTopicById.get(topicId);
+    if (!topic) {
+      setDeleteError('Unable to restore the selected problem.');
+      return;
+    }
+
+    setDeletedTopics((current) => {
+      const next = { ...current };
+      delete next[topicId];
+      return next;
+    });
+  };
+
+  const deleteTopicPermanently = (topicId) => {
+    const topic = allTopicById.get(topicId);
+    if (!topic) {
+      setDeleteError('Unable to permanently delete the selected problem.');
+      return;
+    }
+
+    if (!window.confirm(`Permanently delete "${topic.name}"? This cannot be restored.`)) {
+      return;
+    }
+
+    try {
+      setPermanentlyDeletedTopicIds((current) => (
+        current.includes(topicId) ? current : [...current, topicId]
+      ));
+      setDeletedTopics((current) => {
+        const next = { ...current };
+        delete next[topicId];
+        return next;
+      });
+      setCompleted((current) => {
+        const next = { ...current };
+        delete next[topicId];
+        return next;
+      });
+      setNotes((current) => {
+        const next = { ...current };
+        delete next[topicId];
+        return next;
+      });
+      setFavorites((current) => current.filter((id) => id !== topicId));
+      setRecentlyOpened((current) => current.filter((id) => id !== topicId));
+      setActivityLog((current) => {
+        const next = {};
+        Object.entries(current).forEach(([date, ids]) => {
+          const filtered = ids.filter((id) => id !== topicId);
+          if (filtered.length) next[date] = filtered;
+        });
+        return next;
+      });
+    } catch (error) {
+      setDeleteError('Something went wrong while deleting the problem permanently. Please try again.');
+    }
   };
 
   const toggleFavorite = (topicId) => {
@@ -238,6 +358,12 @@ export default function App() {
     event.target.value = '';
   };
 
+  useEffect(() => {
+    if (!deleteError) return;
+    const timer = window.setTimeout(() => setDeleteError(''), 4000);
+    return () => window.clearTimeout(timer);
+  }, [deleteError]);
+
   const exportProgress = () => {
     const payload = {
       exportedAt: new Date().toISOString(),
@@ -262,6 +388,7 @@ export default function App() {
     onToggleComplete: toggleComplete,
     onSaveNote: saveNote,
     onDeleteNote: deleteNote,
+    onDeleteTopic: deleteTopic,
     onToggleFavorite: toggleFavorite,
     onOpenResource: openResource,
     onEditNote: (topicId) => setActiveNoteTopicId(topicId),
@@ -301,7 +428,7 @@ export default function App() {
 
   const selectSearchResult = (topic) => {
     setQuery('');
-    navigate(categoryToPath[topic.category] || '/');
+    navigate(`/topic/${topic.id}`);
   };
 
   return (
@@ -322,6 +449,12 @@ export default function App() {
           onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           onResetProgress={resetProgress}
         />
+        {deleteError && (
+          <div className="app-banner error-banner" role="alert">
+            <span>{deleteError}</span>
+            <button type="button" className="icon-button danger" onClick={() => setDeleteError('')} aria-label="Dismiss error">✕</button>
+          </div>
+        )}
         <Routes>
           <Route
             path="/"
@@ -340,6 +473,7 @@ export default function App() {
             )}
           />
           <Route path="/dsa" element={<DSA topics={topics} completed={completed} notes={notes} actions={actions} />} />
+          <Route path="/topic/:topicId" element={<TopicDetail topicById={topicById} completed={completed} notes={notes} favorites={favorites} actions={actions} />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/completed" element={<Completed topics={topics} completed={completed} notes={notes} favorites={favorites} actions={actions} />} />
           <Route path="/core-subjects" element={<CoreSubjects {...categoryPageProps('Core Subjects')} />} />
@@ -352,12 +486,9 @@ export default function App() {
               <Settings
                 dailyGoal={dailyGoal}
                 setDailyGoal={setDailyGoal}
-                theme={theme}
-                setTheme={setTheme}
-                importedTopics={importedTopics}
-                onImportBookmarks={importBookmarks}
-                onExportProgress={exportProgress}
-                onResetProgress={resetProgress}
+                deletedTopicDetails={deletedTopicDetails}
+                onRestoreTopic={restoreTopic}
+                onDeleteTopicPermanently={deleteTopicPermanently}
               />
             )}
           />

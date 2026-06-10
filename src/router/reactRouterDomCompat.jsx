@@ -1,4 +1,4 @@
-import { Children, createContext, isValidElement, useContext, useEffect, useMemo, useState } from 'react';
+import { Children, cloneElement, createContext, isValidElement, useContext, useEffect, useMemo, useState } from 'react';
 
 const RouterContext = createContext(null);
 
@@ -60,15 +60,59 @@ export function NavLink({ to, end = false, className = '', children, ...props })
   );
 }
 
+function normalizePath(path) {
+  return path === '/' ? '/' : path.replace(/\/+$/, '') || '/';
+}
+
+function matchPath(routePath, pathname) {
+  if (routePath === '*') return { params: {} };
+
+  const normalizedRoute = normalizePath(routePath);
+  const normalizedPath = normalizePath(pathname);
+  const routeSegments = normalizedRoute.split('/').filter(Boolean);
+  const pathSegments = normalizedPath.split('/').filter(Boolean);
+
+  if (routeSegments.length !== pathSegments.length) return null;
+
+  const params = {};
+  for (let index = 0; index < routeSegments.length; index += 1) {
+    const routeSegment = routeSegments[index];
+    const pathSegment = pathSegments[index];
+
+    if (routeSegment.startsWith(':')) {
+      params[routeSegment.slice(1)] = decodeURIComponent(pathSegment);
+      continue;
+    }
+
+    if (routeSegment !== pathSegment) {
+      return null;
+    }
+  }
+
+  return { params };
+}
+
 export function Routes({ children }) {
   const context = useContext(RouterContext);
   const routes = Children.toArray(children).filter(isValidElement);
-  const match = routes.find((route) => {
-    const routePath = route.props.path;
-    return routePath === '*' || routePath === context.path;
-  });
 
-  return match?.props.element || null;
+  let matchedRoute = null;
+  let matchedParams = {};
+
+  for (const route of routes) {
+    const routePath = route.props.path;
+    const match = matchPath(routePath, context.path);
+    if (match) {
+      matchedRoute = route;
+      matchedParams = match.params;
+      break;
+    }
+  }
+
+  if (!matchedRoute) return null;
+  if (!matchedRoute.props.element) return null;
+
+  return cloneElement(matchedRoute.props.element, { params: matchedParams });
 }
 
 export function Route() {
