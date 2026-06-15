@@ -1,5 +1,6 @@
 import { useNavigate } from '../router/reactRouterDomCompat.jsx';
 import { ExternalLink, FilePenLine, Star } from '../components/Icons.jsx';
+import NotesDisplay from '../components/NotesDisplay.jsx';
 
 const categoryToPath = {
   DSA: '/dsa',
@@ -116,7 +117,7 @@ export default function TopicDetail({ topicById, completed, notes, favorites, ac
         {notes[topic.id] && (
           <div className="topic-detail-card">
             <h3>Saved notes</h3>
-            <p>{notes[topic.id]}</p>
+            <NotesDisplay content={notes[topic.id]} />
           </div>
         )}
       </section>
