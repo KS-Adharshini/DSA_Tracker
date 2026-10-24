@@ -3,7 +3,6 @@ import { useLocalStorage } from '../hooks/useLocalStorage.js';
 import { ExternalLink, FilePenLine, Search } from '../components/Icons.jsx';
 
 const FOLDER_NAMES = [
-  'Leetcode',
   'Reverse',
   'Arrays',
   'Strings',
@@ -15,11 +14,8 @@ const FOLDER_NAMES = [
   'Dynamic Programming'
 ];
 
-const mapSectionToCategory = (section, category = 'DSA') => {
-  if (category !== 'DSA') return category;
-
+const mapSectionToCategory = (section) => {
   const s = section.toLowerCase();
-  if (['arrays', 'recursion', 'backtracking', 'hashing', 'greedy', 'database'].includes(s)) return 'Leetcode';
   if (s.includes('reverse') || s.includes('rotate') || s.includes('rotation')) return 'Reverse';
   if (s.includes('linked list') || s.includes('list') || s.includes('cache')) return 'Linked List';
   if (s.includes('stack') || s.includes('parenthesis') || s.includes('infix') || s.includes('postfix') || s.includes('prefix') || s.includes('expression')) return 'Stack';
@@ -70,27 +66,27 @@ export default function DSA({
     });
   };
 
-  // Use only DSA-specific topics in this view.
-  const sheetTopics = useMemo(() => {
-    return topics.filter((topic) => topic.category === 'DSA');
+  // 1. Filter out non-DSA topics (Core subjects, Aptitude, Mock tests, etc.)
+  const dsaTopics = useMemo(() => {
+    return topics.filter(t => t.category === 'DSA');
   }, [topics]);
 
-  // 2. Classify and group topics into the old themed folders.
+  // 2. Classify and group topics into the 9 target categories
   const groupedDSA = useMemo(() => {
     const groups = {};
     FOLDER_NAMES.forEach(f => {
       groups[f] = [];
     });
 
-    sheetTopics.forEach(topic => {
-      const category = mapSectionToCategory(topic.section, topic.category);
+    dsaTopics.forEach(topic => {
+      const category = mapSectionToCategory(topic.section);
       if (groups[category]) {
         groups[category].push(topic);
       }
     });
 
     return groups;
-  }, [sheetTopics]);
+  }, [dsaTopics]);
 
   // 3. Filter by search query within each group
   const searchFilteredGroupedDSA = useMemo(() => {
@@ -125,8 +121,8 @@ export default function DSA({
       <section className="page-hero dsa-hero">
         <div>
           <p className="eyebrow">Practice Tracker</p>
-          <h2>Complete Placement Sheet</h2>
-          <p>All imported DSA_sheet.html resources are available here with hyperlinks, progress tracking, and rich notes.</p>
+          <h2>DSA Problem Sets</h2>
+          <p>Organize, track, and master data structures and algorithms with rich notes and detailed tracking.</p>
         </div>
         <div className="search-bar-wrap">
           <div className="search-box">
@@ -183,11 +179,11 @@ export default function DSA({
                       <table className="problem-table">
                         <thead>
                           <tr>
-                            <th width="48">Status</th>
+                            <th width="40">Status</th>
                             <th>Problem Title</th>
-                            <th width="220">Sub-Topic</th>
-                            <th width="120">Difficulty</th>
-                            <th width="200" style={{ textAlign: 'right' }}>Actions</th>
+                            <th width="120">Sub-Topic</th>
+                            <th width="100">Difficulty</th>
+                            <th width="120" style={{ textAlign: 'right' }}>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -235,14 +231,6 @@ export default function DSA({
                                       title={hasNote ? 'Edit Notes (Saved)' : 'Add Notes'}
                                     >
                                       <FilePenLine size={14} /> {hasNote ? 'Revise' : 'Notes'}
-                                    </button>
-                                    <button 
-                                      className="action-btn delete-icon-btn"
-                                      onClick={() => actions.onDeleteTopic(problem.id)}
-                                      title="Remove problem"
-                                      aria-label={`Remove ${problem.name}`}
-                                    >
-                                      ✕
                                     </button>
                                   </div>
                                 </td>

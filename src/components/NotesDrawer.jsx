@@ -7,7 +7,6 @@ export default function NotesDrawer({
   initialNote,
   onClose,
   onSaveNote,
-  onSaveDraft,
   onDeleteNote,
 }) {
   const [draft, setDraft] = useState(initialNote || '');
@@ -20,13 +19,12 @@ export default function NotesDrawer({
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (topic && draft !== initialNote) {
-        const saveFn = onSaveDraft || onSaveNote;
-        saveFn(draft);
+        onSaveNote(draft);
       }
     }, 800); // Save after 800ms of inactivity
 
     return () => clearTimeout(delayDebounce);
-  }, [draft, initialNote, topic, onSaveDraft, onSaveNote]);
+  }, [draft, initialNote, topic, onSaveNote]);
 
   if (!topic) return null;
 
@@ -36,7 +34,7 @@ export default function NotesDrawer({
   };
 
   const handleDelete = () => {
-    if (window.confirm('Remove note for this topic?')) {
+    if (window.confirm('Delete note for this topic?')) {
       onDeleteNote();
     }
   };
@@ -85,7 +83,7 @@ export default function NotesDrawer({
             Close
           </button>
           {initialNote && (
-            <button className="icon-button danger delete-btn" onClick={handleDelete} title="Remove note">
+            <button className="icon-button danger delete-btn" onClick={handleDelete} title="Delete note">
               <Trash2 size={18} />
             </button>
           )}

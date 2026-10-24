@@ -1,36 +1,28 @@
-import { useMemo, useState } from 'react';
+import { Download, Upload } from '../components/Icons.jsx';
 
 export default function Settings({
   dailyGoal,
   setDailyGoal,
-  deletedTopicDetails,
-  onRestoreTopic,
-  onDeleteTopicPermanently,
+  theme,
+  setTheme,
+  importedTopics,
+  onImportBookmarks,
+  onExportProgress,
+  onResetProgress,
 }) {
-  const [searchValue, setSearchValue] = useState('');
-
-  const normalizedSearch = searchValue.trim().toLowerCase();
-
-  const filteredDeletedTopics = useMemo(() => deletedTopicDetails.filter(({ topic }) => {
-    if (!normalizedSearch) return true;
-    const searchable = `${topic.name} ${topic.category} ${topic.section} ${topic.difficulty}`.toLowerCase();
-    return searchable.includes(normalizedSearch);
-  }), [deletedTopicDetails, normalizedSearch]);
-
   return (
-    <main className="page settings-page">
-      <section className="page-hero settings-hero">
+    <main className="page">
+      <section className="page-hero">
         <div>
-          <p className="eyebrow">Settings</p>
-          <h2>Daily Study Goal</h2>
-          <p>Keep your preparation focused by setting a single daily topic goal.</p>
+          <p className="eyebrow">Preferences</p>
+          <h2>Settings</h2>
+          <p>Personalize your tracker, import resources, and export your preparation data.</p>
         </div>
       </section>
 
-      <section className="settings-content">
-        <article className="panel settings-goal-panel">
+      <section className="settings-grid">
+        <article className="panel settings-panel">
           <h3>Daily Study Goal</h3>
-          <p>How many topics would you like to study per day?</p>
           <label className="field">
             Topics per day
             <input
@@ -43,67 +35,35 @@ export default function Settings({
           </label>
         </article>
 
-        <article className="panel deleted-problems-panel">
-          <div className="deleted-header">
-            <div>
-              <p className="eyebrow">Removed Problems</p>
-              <h3>Recover or remove removed problems</h3>
-              <p>Restore recently removed problems or permanently remove them from your tracker.</p>
-            </div>
-            <input
-              className="search-input"
-              type="search"
-              placeholder="Search removed problems..."
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              aria-label="Search removed problems"
-            />
+        <article className="panel settings-panel">
+          <h3>Theme</h3>
+          <div className="segmented">
+            <button className={theme === 'light' ? 'active' : ''} type="button" onClick={() => setTheme('light')}>Light</button>
+            <button className={theme === 'dark' ? 'active' : ''} type="button" onClick={() => setTheme('dark')}>Dark</button>
           </div>
+        </article>
 
-          {filteredDeletedTopics.length ? (
-            <div className="deleted-list">
-              <div className="deleted-row deleted-row-heading">
-                <span>Title</span>
-                <span>Topic / Category</span>
-                <span>Difficulty</span>
-                <span>Actions</span>
-              </div>
-              {filteredDeletedTopics.map(({ id, topic }) => (
-                <div className="deleted-row" key={id}>
-                  <span>{topic.name}</span>
-                  <span>{topic.category} / {topic.section}</span>
-                  <span>
-                    <span className={`difficulty ${topic.difficulty.toLowerCase()}`}>
-                      {topic.difficulty}
-                    </span>
-                  </span>
-                  <span className="deleted-row-actions">
-                    <button
-                      className="icon-button restore-icon"
-                      type="button"
-                      onClick={() => onRestoreTopic(id)}
-                      title="Restore problem"
-                      aria-label="Restore problem"
-                    >
-                      ↩
-                    </button>
-                    <button
-                      className="action-btn delete-icon-btn"
-                      type="button"
-                      onClick={() => onDeleteTopicPermanently(id)}
-                      title="Remove permanently"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <p>No removed problems found.</p>
-            </div>
-          )}
+        <article className="panel settings-panel">
+          <h3>Bookmarks</h3>
+          <label className="file-import">
+            <Upload size={18} />
+            Import HTML Bookmarks
+            <input type="file" accept=".html,.htm" onChange={onImportBookmarks} />
+          </label>
+          <p>{importedTopics.length} imported resource{importedTopics.length === 1 ? '' : 's'} saved.</p>
+        </article>
+
+        <article className="panel settings-panel">
+          <h3>Data</h3>
+          <div className="button-stack">
+            <button className="primary-button" type="button" onClick={onExportProgress}>
+              <Download size={18} />
+              Export Progress JSON
+            </button>
+            <button className="ghost-button danger-text" type="button" onClick={onResetProgress}>
+              Reset Progress
+            </button>
+          </div>
         </article>
       </section>
     </main>

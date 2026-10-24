@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { ExternalLink, FilePenLine, Star } from './Icons.jsx';
-import NotesDisplay from './NotesDisplay.jsx';
 
 export default function TopicCard({
   topic,
@@ -11,10 +9,7 @@ export default function TopicCard({
   onToggleFavorite,
   onOpenResource,
   onEditNote,
-  onDeleteTopic,
 }) {
-  const [showNotes, setShowNotes] = useState(false);
-
   return (
     <article className={`topic-card ${completed ? 'is-complete' : ''}`}>
       <div className="topic-card-head">
@@ -47,30 +42,13 @@ export default function TopicCard({
         </label>
       </div>
 
-      {note && showNotes && (
-        <div className="topic-card-notes">
-          <NotesDisplay content={note} />
-        </div>
-      )}
+      {note && <p className="note-preview">{note}</p>}
 
       <div className="topic-actions">
-        <button className="action-btn delete-btn" type="button" onClick={() => onDeleteTopic(topic.id)} aria-label={`Remove ${topic.name}`}>
-          ✕
-        </button>
         <a href={topic.url} target="_blank" rel="noreferrer" onClick={() => onOpenResource(topic.id)}>
           Open Resource
           <ExternalLink size={16} />
         </a>
-        {note && (
-          <button
-            className={`ghost-button ${showNotes ? 'active' : ''}`}
-            type="button"
-            onClick={() => setShowNotes(!showNotes)}
-            title={showNotes ? 'Hide notes' : 'Show notes'}
-          >
-            📝 Notes
-          </button>
-        )}
         <button className="ghost-button" type="button" onClick={() => onEditNote(topic.id)}>
           <FilePenLine size={16} />
           {note ? 'Edit Notes' : 'Add Notes'}
